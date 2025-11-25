@@ -1,0 +1,50 @@
+    itemPool: [
+        // Common
+        { name: "生鏽匕首", type: "weapon", val: 3, rarity: "common", price: 15, icon: "🗡️" },
+        { name: "木棒", type: "weapon", val: 4, rarity: "common", price: 20, icon: "🪵" },
+        { name: "刺客短刀", type: "weapon", val: 6, rarity: "common", price: 30, icon: "🔪" },
+        { name: "布衣", type: "armor", val: 10, rarity: "common", price: 15, icon: "👕" },
+        { name: "皮甲", type: "armor", val: 15, rarity: "common", price: 25, icon: "🧥" },
+        { name: "木盾", type: "shield", val: 1, rarity: "common", price: 20, icon: "🛡️" },
+        { name: "治療藥水", type: "consumable", val: 30, rarity: "common", price: 25, icon: "🧪", desc: "恢復30點生命" },
+        
+        // Uncommon
+        { name: "騎士長槍", type: "weapon", val: 12, rarity: "uncommon", price: 80, icon: "🔱" },
+        { name: "鐵劍", type: "weapon", val: 15, rarity: "uncommon", price: 90, icon: "⚔️" },
+        { name: "戰斧", type: "weapon", val: 18, rarity: "uncommon", price: 100, icon: "🪓" },
+        { name: "鎖子甲", type: "armor", val: 40, rarity: "uncommon", price: 80, icon: "🛡️" },
+        { name: "旅行者斗篷", type: "armor", val: 35, rarity: "uncommon", price: 70, icon: "🧥" },
+        { name: "鐵盾", type: "shield", val: 2, rarity: "uncommon", price: 60, icon: "🛡️" },
+        { name: "強力藥水", type: "consumable", val: 80, rarity: "uncommon", price: 60, icon: "🍷", desc: "恢復80點生命" },
+
+        // Rare
+        { name: "秘銀劍", type: "weapon", val: 30, rarity: "rare", price: 250, icon: "⚔️" },
+        { name: "精靈長弓", type: "weapon", val: 35, rarity: "rare", price: 280, icon: "🏹" },
+        { name: "巨劍", type: "weapon", val: 40, rarity: "rare", price: 300, icon: "🗡️" },
+        { name: "板甲", type: "armor", val: 100, rarity: "rare", price: 250, icon: "🛡️" },
+        { name: "魔法師長袍", type: "armor", val: 80, rarity: "rare", price: 220, icon: "👘" },
+        { name: "騎士盾", type: "shield", val: 3, rarity: "rare", price: 300, icon: "🛡️" },
+        { name: "精靈藥劑", type: "consumable", val: 200, rarity: "rare", price: 150, icon: "🧉", desc: "恢復200點生命" },
+
+        // Epic
+        { name: "屠龍劍", type: "weapon", val: 60, rarity: "epic", price: 800, icon: "🐉" },
+        { name: "暗影權杖", type: "weapon", val: 65, rarity: "epic", price: 850, icon: "🦯" },
+        { name: "龍鱗鎧甲", type: "armor", val: 250, rarity: "epic", price: 800, icon: "🥋" },
+        { name: "暗影斗篷", type: "armor", val: 220, rarity: "epic", price: 750, icon: "🧛" },
+        { name: "塔盾", type: "shield", val: 5, rarity: "epic", price: 500, icon: "🧱" },
+        { name: "皇家盾牌", type: "shield", val: 6, rarity: "epic", price: 600, icon: "🛡️" },
+        { name: "全能藥水", type: "consumable", val: 500, rarity: "epic", price: 400, icon: "🏺", desc: "恢復500點生命" },
+
+        // Legendary
+        { name: "聖劍 Excalibur", type: "weapon", val: 150, rarity: "legendary", price: 2500, icon: "🌟" },
+        { name: "雷神之錘", type: "weapon", val: 160, rarity: "legendary", price: 2800, icon: "🔨" },
+        { name: "神之光輝", type: "armor", val: 400, rarity: "legendary", price: 2000, icon: "🌞" },
+        { name: "奧丁戰甲", type: "armor", val: 450, rarity: "legendary", price: 2400, icon: "💂" },
+        { name: "埃癸斯之盾", type: "shield", val: 10, rarity: "legendary", price: 900, icon: "🔱" },
+        { name: "冥王之盾", type: "shield", val: 12, rarity: "legendary", price: 1200, icon: "🛡️" },
+
+        // Mythic & Ultra
+        { name: "無限手套", type: "weapon", val: 300, rarity: "mythic", price: 9999, icon: "🥊" },
+        { name: "絕對防禦", type: "armor", val: 1000, rarity: "mythic", price: 9999, icon: "🌌" },
+        { name: "妖刀村正", type: "weapon", val: 500, rarity: "ultra", price: 15000, icon: "🗡️", desc: "受詛咒的妖刀，+20% 暴擊率" }
+    ],
