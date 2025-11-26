@@ -23,7 +23,91 @@
             /* Buff Colors */
             --buff-angel: #4fc3f7;
             --buff-demon: #ef5350;
-        }
+        } 
+
+/* --- 新增樣式：戰鬥提示文字 --- */
+.combat-hint {
+    position: absolute;  /* 絕對定位 */
+    bottom: 10px;        /* 固定在父容器底部 10px 的位置 */
+    left: 0;
+    width: 100%;         /* 寬度佔滿 */
+    text-align: center;  /* 文字置中 */
+    font-size: 0.8em;
+    color: #666;         /* 顏色稍微深一點，不要太搶眼 */
+    pointer-events: none; /* 讓點擊穿透，避免擋到其他操作 (雖然在底部應該不會) */
+}
+
+/* --- 新增樣式：技能與 MP --- */
+.mp-text { color: #2196f3; font-weight: bold; }
+.skill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-top: 5px;
+    
+    box-sizing: border-box;
+    width: 100%; 
+    max-width: 100%; 
+    
+    /* [修改] 改為 0，讓按鈕寬度與上方文字對齊 */
+    padding: 0; 
+}
+/* --- [補上] 強制固定捲軸樣式，避免捲軸出現時擠壓內容 --- */
+.skill-list::-webkit-scrollbar {
+    width: 8px; /* 鎖定捲軸寬度 */
+}
+.skill-list::-webkit-scrollbar-track {
+    background: #222; 
+    border-radius: 4px;
+}
+.skill-list::-webkit-scrollbar-thumb {
+    background: #555; 
+    border-radius: 4px;
+}
+.skill-item { 
+    background: #333;
+    border: 2px solid transparent; 
+    border-color: #555; 
+    
+    padding: 10px; 
+    border-radius: 4px;
+    cursor: pointer; 
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    
+    box-sizing: border-box;
+    flex-shrink: 0;
+    
+    /* [關鍵] 強制設為 100%，但受限於父容器的 max-width，所以不會無限變寬 */
+    width: 100%; 
+    
+    height: 60px;
+    overflow: hidden;
+}
+.skill-item:hover { background: #444; border-color: var(--accent-color); }
+.skill-item.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(100%); }
+.skill-cost { color: #64b5f6; font-size: 0.9em; }
+.skill-desc-box { 
+    font-size: 0.8em; 
+    color: #aaa; 
+    margin-top: 4px;
+    
+    /* [新增] 以下三行是用來強制文字不換行，超出顯示 ... */
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    /* 確保它不會撐開寬度 */
+    width: 100%; 
+}
+/* [新增] 確保技能按鈕內的文字容器不會超過按鈕寬度 */
+.skill-item > div {
+    overflow: hidden; /* 超出邊界隱藏 */
+    width: 100%;      /* 佔滿空間 */
+}
 
         body {
             font-family: var(--font-main);
@@ -115,6 +199,15 @@
             overflow: hidden;
         }
 
+    #event-desc {
+    /* [關鍵] 強制佔滿父容器的寬度，不再隨文字內容縮放 */
+    width: 100%; 
+    
+    /* 保持原本的設定 */
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
         .monster-icon { font-size: 4em; margin-bottom: 10px; display: inline-block; transition: 0.3s; }
         
         /* Glow Effects */
@@ -142,11 +235,50 @@
 
         .floating-text {
             position: absolute;
-            left: 50%; top: 40%; transform: translateX(-50%);
+            left: 50%; /* 保持水平居中 */
+            /* 移除 top: 40% 或 50% 的固定設置 */
+            transform: translateX(-50%);
             font-weight: bold; font-size: 1.5em; pointer-events: none;
             text-shadow: 2px 2px 0 #000; z-index: 100;
-            animation: float-up 1s ease-out forwards;
         }
+/* --- 補上遺失的浮動動畫 --- */
+@keyframes float-up-base { 
+    0% { transform: translate(-50%, 0); opacity: 1; } 
+    100% { transform: translate(-50%, -60px); opacity: 0; }
+}
+
+/* 確保這兩個類別有引用動畫 */
+.floating-text.dmg-out { 
+    left: 35%;
+    top: 55%;
+    animation: float-up-base 1s ease-out forwards; /* 這裡引用上面的 keyframes */
+}
+
+.floating-text.dmg-in { 
+    left: 65%;
+    top: 45%;
+    animation: float-up-base 1s ease-out forwards; /* 這裡引用上面的 keyframes */
+}
+
+        /* 新增一個平移的基礎動畫 */
+        @keyframes float-up-base { 
+            0% { transform: translate(-50%, 0); opacity: 1; } 
+            100% { transform: translate(-50%, -60px); opacity: 0; }
+        }
+        .anim-float { animation: float-up-base 1s ease-out forwards; }
+        
+        /* 針對不同類型的浮動文字，設置不同的起始水平和垂直偏移 */
+        .floating-text.dmg-out { 
+            left: 35%; /* 玩家傷害/治療：偏左 */
+            top: 55%;  /* 垂直起始點設置較低 */
+            animation: float-up-base 1s ease-out forwards; 
+        }
+        .floating-text.dmg-in { 
+            left: 65%; /* 怪物傷害：偏右 */
+            top: 45%;  /* 垂直起始點設置較高 */
+            animation: float-up-base 1s ease-out forwards;
+        }
+        
 
         /* Text Styles */
         .damage-text { color: #ff5252; font-weight: bold; }
@@ -203,7 +335,7 @@
             background: rgba(0,0,0,0.95); z-index: 200;
             display: none; flex-direction: column; align-items: center; justify-content: center;
         }
-        #race-modal { display: flex; } /* Show Race First */
+        #race-modal { display: none; } /* Default state should be hidden, controlled by JS */
         #class-modal { display: none; }
 
         .class-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 500px; width: 100%; padding: 20px; }
@@ -245,7 +377,7 @@
     <div class="class-options">
         <div class="class-card" onclick="Game.selectRace('elf')">
             <div class="class-title">🧝 精靈</div>
-            <div class="class-desc">戰鬥每回合與事件後<br>回復 5% 生命</div>
+            <div class="class-desc">進入戰鬥每回合與遇到事件後<br>回復 5% 生命</div>
         </div>
         <div class="class-card" onclick="Game.selectRace('demon')">
             <div class="class-title">👿 魔族</div>
@@ -253,7 +385,7 @@
         </div>
         <div class="class-card" onclick="Game.selectRace('human')">
             <div class="class-title">👱 人類</div>
-            <div class="class-desc">天賦異稟<br>暴擊率 +20%</div>
+            <div class="class-desc">天賦異稟<br>暴擊率 +25%</div>
         </div>
         <div class="class-card" onclick="Game.selectRace('orc')">
             <div class="class-title">👹 半獸人</div>
@@ -266,19 +398,19 @@
     <div class="class-options">
         <div class="class-card" onclick="Game.selectGender('male')">
             <div class="class-title">🚹 男性</div>
-            <div class="class-desc">平凡無奇<br>基礎攻擊 +2</div>
+            <div class="class-desc">平凡無奇<br>基礎攻擊 +10</div>
         </div>
         <div class="class-card" onclick="Game.selectGender('female')">
             <div class="class-title">🚺 女性</div>
-            <div class="class-desc">骨骼驚奇<br>生命上限 +20</div>
+            <div class="class-desc">骨骼驚奇<br>生命上限 +40</div>
         </div>
         <div class="class-card" onclick="Game.selectGender('none')">
             <div class="class-title">🗿 無性別</div>
-            <div class="class-desc">心如止水<br>防禦效果 +5% (減傷)</div>
+            <div class="class-desc">心如止水<br>防禦效果 +10% (減傷)</div>
         </div>
         <div class="class-card" onclick="Game.selectGender('nonbinary')">
             <div class="class-title">🌈 非二元</div>
-            <div class="class-desc">無法被定義<br>每回合隨機獲得 1~5 金幣</div>
+            <div class="class-desc">無法被定義<br>每回合隨機獲得 1~10 金幣</div>
         </div>
     </div>
 </div>
@@ -352,13 +484,13 @@
         </div>
     </header>
 
-    <div class="stats-grid">
-        <div class="stat-item">生命: <span id="hp-val">100</span> / <span id="max-hp-val">100</span></div>
-        <div class="stat-item">攻擊: <span id="atk-val">5</span></div>
-        <div class="stat-item">金幣: <span id="gold-val">100</span></div>
-        <div class="stat-item">深度: <span id="depth-val">0</span> 層</div>
-        <div id="buff-display" title="點擊查看詳細效果">狀態: 無</div>
-    </div>
+<div class="stats-grid">
+    <div class="stat-item">生命: <span id="hp-val">100</span> / <span id="max-hp-val">100</span></div>
+    <div class="stat-item">魔力: <span id="mp-val" class="mp-text">50</span> / <span id="max-mp-val">50</span></div> <div class="stat-item">攻擊: <span id="atk-val">5</span></div>
+    <div class="stat-item">金幣: <span id="gold-val">100</span></div>
+    <div class="stat-item">深度: <span id="depth-val">0</span> 層</div>
+    <div id="buff-display" title="點擊查看詳細效果">狀態: 無</div>
+</div>
 
     <div id="event-display">
         <div id="event-icon" class="monster-icon">🎲</div>
@@ -403,7 +535,7 @@
 <script>
 (function() {
 const CONFIG = {
-    rarityProb: { common: 0.45, uncommon: 0.3, rare: 0.15, epic: 0.06, legendary: 0.03, mythic: 0.01 },
+    rarityProb: { common: 0.40, uncommon: 0.3, rare: 0.15, epic: 0.05, legendary: 0.015, mythic: 0.0035, ultra: 0.0015 }, 
     rarityDisplay: {
         common: { color: "rarity-common", label: "一般", val: 1 },
         uncommon: { color: "rarity-uncommon", label: "優質", val: 2 },
@@ -414,39 +546,39 @@ const CONFIG = {
         ultra: { color: "rarity-ultra", label: "極傳說", val: 7 }
     },
     buffs: {
-        angel_song: { id: 'angel_song', name: '👼 天使的歌頌', type: 'angel', desc: '每次事件恢復 5 HP' },
+        angel_song: { id: 'angel_song', name: '👼 天使的歌頌', type: 'angel', desc: '每次事件恢復 20 HP' },
         angel_protection: { id: 'angel_protection', name: '🛡️ 天使的加護', type: 'angel', desc: '怪物造成的傷害減少 30%' },
         angel_courage: { id: 'angel_courage', name: '⚔️ 天使的勇氣', type: 'angel', desc: '致命一擊機率提升至 20%' },
-        angel_wings: { id: 'angel_wings', name: '🕊️ 天使的翅膀', type: 'angel', desc: '逃跑成功率提升至 60%' },
+        angel_wings: { id: 'angel_wings', name: '🕊️ 天使的翅膀', type: 'angel', desc: '逃跑成功率從50%提升至 70%' },
         demon_wealth: { id: 'demon_wealth', name: '💰 惡魔的財富', type: 'demon', desc: '攻擊得5金幣，但逃跑失敗被攻擊時扣5金幣' },
         demon_destruction: { id: 'demon_destruction', name: '💀 惡魔的破壞', type: 'demon', desc: '10%機率秒殺怪物，觸發後扣除當前血量90%' },
         demon_enhance: { id: 'demon_enhance', name: '🔥 惡魔的強化', type: 'demon', desc: '雙方致命一擊機率變為 50%' },
-        demon_wager: { id: 'demon_wager', name: '🎲 惡魔的賭約', type: 'demon', desc: '逃跑率80%，但每次逃跑有1%機率直接死亡' }
+        demon_wager: { id: 'demon_wager', name: '🎲 惡魔的賭約', type: 'demon', desc: '逃跑率85%，但每次逃跑有1.5%機率直接死亡' }
     },
    monsters: [
     // 前期怪物 (1-6層): 數值略為上調，金幣翻倍
-    { name: "史萊姆", weight: 12, baseGold: 2, icon: "🦠", hp: 30, atk: 5, drop: "史萊姆黏液", eliteDrop: "史萊姆精華", bossDrop: "史萊姆王冠" },
-    { name: "哥布林", weight: 12, baseGold: 4, icon: "👺", hp: 50, atk: 8, drop: "破布", eliteDrop: "哥布林耳環", bossDrop: "哥布林金牙" },
-    { name: "巨型蜘蛛", weight: 10, baseGold: 5, icon: "🕷️", hp: 60, atk: 10, drop: "蜘蛛絲", eliteDrop: "毒囊", bossDrop: "劇毒獠牙" },
-    { name: "狂狼", weight: 10, baseGold: 6, icon: "🐺", hp: 70, atk: 12, drop: "狼皮", eliteDrop: "狼牙", bossDrop: "狼王披風" },
-    { name: "吸血蝙蝠", weight: 8, baseGold: 8, icon: "🦇", hp: 60, atk: 13, drop: "蝙蝠翅膀", eliteDrop: "吸血鬼之塵", bossDrop: "血腥護符" },
-    { name: "骷髏兵", weight: 10, baseGold: 8, icon: "💀", hp: 80, atk: 15, drop: "骨頭", eliteDrop: "靈魂碎片", bossDrop: "死靈頭骨" },
+    { name: "史萊姆", weight: 12, baseGold: 2, icon: "🦠", hp: 35, atk: 6, drop: "史萊姆黏液", eliteDrop: "史萊姆精華", bossDrop: "史萊姆王冠" },
+    { name: "哥布林", weight: 12, baseGold: 4, icon: "👺", hp: 55, atk: 9, drop: "破布", eliteDrop: "哥布林耳環", bossDrop: "哥布林金牙" },
+    { name: "巨型蜘蛛", weight: 10, baseGold: 5, icon: "🕷️", hp: 65, atk: 11, drop: "蜘蛛絲", eliteDrop: "毒囊", bossDrop: "劇毒獠牙" },
+    { name: "狂狼", weight: 10, baseGold: 6, icon: "🐺", hp: 75, atk: 13, drop: "狼皮", eliteDrop: "狼牙", bossDrop: "狼王披風" },
+    { name: "吸血蝙蝠", weight: 8, baseGold: 8, icon: "🦇", hp: 65, atk: 14, drop: "蝙蝠翅膀", eliteDrop: "吸血鬼之塵", bossDrop: "血腥護符" },
+    { name: "骷髏兵", weight: 10, baseGold: 8, icon: "💀", hp: 85, atk: 16, drop: "骨頭", eliteDrop: "靈魂碎片", bossDrop: "死靈頭骨" },
     
     // 中期怪物 (7-10層): 數值明顯上調，金幣增加 50%
-    { name: "半獸人", weight: 10, baseGold: 12, icon: "👹", hp: 120, atk: 18, drop: "斷劍", eliteDrop: "半獸人護符", bossDrop: "戰爭號角" },
-    { name: "幽靈", weight: 8, baseGold: 15, icon: "👻", hp: 100, atk: 22, drop: "靈質", eliteDrop: "怨念集合體", bossDrop: "幽靈提燈" },
-    { name: "石巨人", weight: 7, baseGold: 25, icon: "🗿", hp: 250, atk: 30, drop: "石塊", eliteDrop: "魔力核心", bossDrop: "大地之心" },
-    { name: "黑暗騎士", weight: 5, baseGold: 30, icon: "♟️", hp: 300, atk: 35, drop: "黑暗金屬", eliteDrop: "墮落徽章", bossDrop: "黑騎士之盔" },
+    { name: "半獸人", weight: 10, baseGold: 12, icon: "👹", hp: 120, atk: 19, drop: "斷劍", eliteDrop: "半獸人護符", bossDrop: "戰爭號角" },
+    { name: "幽靈", weight: 8, baseGold: 15, icon: "👻", hp: 100, atk: 23, drop: "靈質", eliteDrop: "怨念集合體", bossDrop: "幽靈提燈" },
+    { name: "石巨人", weight: 7, baseGold: 25, icon: "🗿", hp: 250, atk: 31, drop: "石塊", eliteDrop: "魔力核心", bossDrop: "大地之心" },
+    { name: "黑暗騎士", weight: 5, baseGold: 30, icon: "♟️", hp: 300, atk: 36, drop: "黑暗金屬", eliteDrop: "墮落徽章", bossDrop: "黑騎士之盔" },
     
     // 後期怪物 (11-14層): 數值大幅上調，金幣翻倍
     { name: "食人妖", weight: 4, baseGold: 50, icon: "🧟", hp: 400, atk: 40, drop: "巨棒", eliteDrop: "食人妖之血", bossDrop: "食人妖圖騰" },
     { name: "奇美拉", weight: 3, baseGold: 60, icon: "🦁", hp: 500, atk: 50, drop: "奇美拉之牙", eliteDrop: "合成獸皮毛", bossDrop: "混沌之核" },
-    { name: "雙足飛龍", weight: 2, baseGold: 80, icon: "🐉", hp: 700, atk: 60, drop: "龍鱗", eliteDrop: "龍之淚", bossDrop: "龍心" },
-    { name: "巫妖", weight: 1.5, baseGold: 90, icon: "🧙", hp: 800, atk: 70, drop: "詛咒布料", eliteDrop: "命匣", bossDrop: "亡靈法書" },
+    { name: "雙足飛龍", weight: 2, baseGold: 80, icon: "🐉", hp: 660, atk: 60, drop: "龍鱗", eliteDrop: "龍之淚", bossDrop: "龍心" },
+    { name: "巫妖", weight: 1.5, baseGold: 90, icon: "🧙", hp: 500, atk: 72, drop: "詛咒布料", eliteDrop: "命匣", bossDrop: "亡靈法書" },
     
     // 最終怪物 (15-16層): 數值翻倍，成為真正的強敵
-    { name: "遠古巨龍", weight: 0.5, baseGold: 200, icon: "🦖", hp: 1200, atk: 120, drop: "龍骨", eliteDrop: "龍血瓶", bossDrop: "龍神逆鱗" },
-    { name: "魔王", weight: 1, baseGold: 100, icon: "👿", hp: 1500, atk: 100, drop: "黑暗物質", eliteDrop: "魔王印記", bossDrop: "魔神之眼" }
+    { name: "遠古巨龍", weight: 0.5, baseGold: 200, icon: "🦖", hp: 900, atk: 85, drop: "龍骨", eliteDrop: "龍血瓶", bossDrop: "龍神逆鱗" },
+    { name: "魔王", weight: 1, baseGold: 100, icon: "👿", hp: 1000, atk: 100, drop: "黑暗物質", eliteDrop: "魔王印記", bossDrop: "魔神之眼" }
 ],
     lootData: {
         "史萊姆黏液": { price: 10, rarity: "common", icon: "💧" },
@@ -553,11 +685,139 @@ const CONFIG = {
     { name: "戰神巨斧", type: "weapon", val: 220, rarity: "legendary", price: 3500, icon: "🪓" }, // [新增]
 
     // Mythic & Ultra (神話與極傳說) - 增加守護者鎧甲 (注重防禦)
-    { name: "無限手套", type: "weapon", val: 300, rarity: "mythic", price: 9999, icon: "🥊" },
-    { name: "絕對防禦", type: "armor", val: 1000, rarity: "mythic", price: 9999, icon: "🌌" },
-    { name: "守護者鎧甲", type: "armor", val: 1500, rarity: "ultra", price: 15000, icon: "🥋" }, // [新增]
-    { name: "妖刀村正", type: "weapon", val: 500, rarity: "ultra", price: 15000, icon: "🗡️", desc: "受詛咒的妖刀，+20% 暴擊率" }
+    { name: "無限手套", type: "weapon", val: 300, rarity: "mythic", price: 5000, icon: "🥊" },
+    { name: "絕對防禦", type: "armor", val: 1000, rarity: "mythic", price: 5000, icon: "🌌" },
+    { name: "守護者鎧甲", type: "armor", val: 1500, rarity: "ultra", price: 7000, icon: "🥋" }, // [新增]
+    { name: "妖刀村正", type: "weapon", val: 500, rarity: "ultra", price: 7000, icon: "🗡️", desc: "受詛咒的妖刀，+20% 暴擊率" }
 ],
+// ... 在 itemPool 之後加入
+skills: {
+        // ==========================================
+        // Common (一般) - 基礎戰技與生存
+        // ==========================================
+        "heavy_strike": { 
+            id: "heavy_strike", name: "重擊", rarity: "common", mpCost: 30, 
+            desc: "基礎戰技，造成 1.25 倍的傷害。",
+            effect: (p, e) => ({ dmgMult: 1.25, text: "揮出重重的一擊！" }) 
+        },
+        "quick_stab": { 
+            id: "quick_stab", name: "突刺", rarity: "common", mpCost: 15, 
+            desc: "快速的一擊，消耗極低。造成 1.1 倍傷害。",
+            effect: (p, e) => ({ dmgMult: 1.1, text: "迅速刺向敵人！" }) 
+        },
+        "stone_throw": { 
+            id: "stone_throw", name: "投石", rarity: "common", mpCost: 20, 
+            desc: "固定傷害攻擊 (40點)。",
+            effect: (p, e) => ({ flatDmg: 40, dmgMult: 0, text: "撿起石頭用力丟過去！" }) 
+        },
+        "first_aid": { 
+            id: "first_aid", name: "急救", rarity: "common", mpCost: 40, 
+            desc: "簡單的包紮，恢復 15% 最大生命。",
+            effect: (p, e) => ({ healPct: 0.15, text: "進行了緊急包紮。", type: "heal" }) 
+        },
+        // [新增] 一般技能 1：低耗魔魔法
+        "spark": { 
+            id: "spark", name: "小火花", rarity: "common", mpCost: 25, 
+            desc: "造成 15 點固定 + 1.0 倍傷害。",
+            effect: (p, e) => ({ dmgMult: 1.0, flatDmg: 15, text: "指尖彈出小火花！", anim: "glow-red" }) 
+        },
+        // [新增] 一般技能 2：極低耗體術
+        "kick": { 
+            id: "kick", name: "踢擊", rarity: "common", mpCost: 15, 
+            desc: "稍微用力的踢擊，造成 25 點傷害。",
+            effect: (p, e) => ({ dmgMult: 0, flatDmg: 25, text: "狠狠地踢了一腳！" }) 
+        },
+
+        // ==========================================
+        // Uncommon (優質) - 進階技巧
+        // ==========================================
+        "double_cut": { 
+            id: "double_cut", name: "二連斬", rarity: "uncommon", mpCost: 45, 
+            desc: "連續攻擊兩次，共造成 1.5 倍傷害。",
+            effect: (p, e) => ({ dmgMult: 1.5, text: "使出二連斬！" }) 
+        },
+        "wind_blade": { 
+            id: "wind_blade", name: "風刃", rarity: "uncommon", mpCost: 50, 
+            desc: "召喚風刃，造成 20 點固定 +  1.4 倍傷害。",
+            effect: (p, e) => ({ dmgMult: 1.4, flatDmg: 20, text: "無形的風刃切裂空氣！", anim: "glow-blue" }) 
+        },
+        // [新增] 優質技能 1：吸血類 (續戰力)
+        "drain_strike": { 
+            id: "drain_strike", name: "吸血斬", rarity: "uncommon", mpCost: 60, 
+            desc: "造成 1.2 倍傷害，並將傷害轉化為微量治療。",
+            effect: (p, e) => ({ dmgMult: 1.2, healPct: 0.05, text: "劍刃泛著嗜血的紅光！", anim: "glow-red" }) 
+        },
+        // [新增] 優質技能 2：純物理爆發
+        "bone_crusher": { 
+            id: "bone_crusher", name: "碎骨擊", rarity: "uncommon", mpCost: 55, 
+            desc: "強力的一擊，造成 1.7 倍傷害。",
+            effect: (p, e) => ({ dmgMult: 1.7, text: "發出骨頭碎裂的聲音！" }) 
+        },
+
+        // ==========================================
+        // Rare (稀有) - 元素與魔法
+        // ==========================================
+        "fireball": { 
+            id: "fireball", name: "火球術", rarity: "rare", mpCost: 70, 
+            desc: "造成 30 點固定 + 1.6 倍的傷害。",
+            effect: (p, e) => ({ flatDmg: 30, dmgMult: 1.6, text: "發射了一枚熾熱的火球！", anim: "glow-red" }) 
+        },
+        "ice_spear": { 
+            id: "ice_spear", name: "冰槍術", rarity: "rare", mpCost: 75, 
+            desc: "貫穿敵人的冰槍，造成 1.8 倍傷害。",
+            effect: (p, e) => ({ dmgMult: 1.8, text: "寒冰凝聚成槍，射向敵人！", anim: "glow-blue" }) 
+        },
+        // [新增] 稀有技能 1：暗影高傷
+        "shadow_dance": { 
+            id: "shadow_dance", name: "影之舞", rarity: "rare", mpCost: 90, 
+            desc: "化身暗影進行連擊，造成 2.2 倍傷害。",
+            effect: (p, e) => ({ dmgMult: 2.2, text: "在陰影中看不見的連擊！", anim: "glow-purple" }) 
+        },
+
+        // ==========================================
+        // Epic (史詩) - 強大的神聖與自然之力
+        // ==========================================
+        "heal_light": { 
+            id: "heal_light", name: "聖光術", rarity: "epic", mpCost: 100, 
+            desc: "恢復 40% 最大生命值 (不造成傷害)。",
+            effect: (p, e) => ({ healPct: 0.4, dmgMult: 0, text: "沐浴在聖光之中...", type: "heal" }) 
+        },
+        "thunder_storm": { 
+            id: "thunder_storm", name: "雷霆萬鈞", rarity: "epic", mpCost: 120, 
+            desc: "召喚落雷，造成 2.5 倍的強力傷害。",
+            effect: (p, e) => ({ dmgMult: 2.5, text: "天空降下狂雷！", anim: "glow-blue" }) 
+        },
+
+        // ==========================================
+        // Legendary (傳說) - 毀天滅地
+        // ==========================================
+        "god_slash": { 
+            id: "god_slash", name: "神滅斬", rarity: "legendary", mpCost: 200, 
+            desc: "造成 5 倍攻擊力的毀滅性傷害。",
+            effect: (p, e) => ({ dmgMult: 5.0, text: "連空間都切開的一擊！", anim: "glow-purple" }) 
+        },
+        // [新增] 傳說技能 1：龍族之力
+        "dragon_fury": { 
+            id: "dragon_fury", name: "龍之怒", rarity: "legendary", mpCost: 180, 
+            desc: "噴出龍息，造成 200 點固定 + 3.5 倍的傷害。",
+            effect: (p, e) => ({ dmgMult: 3.5, flatDmg: 200, text: "被毀滅性的龍息吞沒！", anim: "glow-red" }) 
+        },
+
+        // ==========================================
+        // Mythic / Ultra (神話/極傳說) - 規則破壞者
+        // ==========================================
+        "genesis": { 
+            id: "genesis", name: "創世之光", rarity: "mythic", mpCost: 350, 
+            desc: "完全恢復所有生命值。",
+            effect: (p, e) => ({ healPct: 1.0, text: "見證奇蹟的時刻！", type: "heal" }) 
+        },
+        "void_collapse": { 
+            id: "void_collapse", name: "虛空崩塌", rarity: "ultra", mpCost: 500, 
+            desc: "造成 15 倍攻擊力的終極傷害。",
+            effect: (p, e) => ({ dmgMult: 15.0, text: "世界在虛空中歸於虛無...", anim: "glow-purple" }) 
+        }
+    },
+    // ...
     phoenixFeather: {
         id: "phoenix_feather",
         name: "不死鳥的羽毛",
@@ -590,49 +850,70 @@ const CONFIG = {
 const Player = {
     hp: 100,
     maxHp: 100,
+    mp: 120,        // <--- [補上這行]
+    maxMp: 120,     // <--- [補上這行]
     baseAtk: 5,
-    gold: 500, 
+    gold: 100, 
     depth: 0,
     class: null,
     race: null,
     gender: null,      // [新增]
     orientation: null, // [新增]
+    skills: ["quick_stab","heavy_strike","kick","stone_throw", "double_cut", "wind_blade", "spark", "fireball", "shadow_dance", "first_aid", "heal_light", "god_slash"],
     equipment: { weapon: null, armor: null, shield: null },
     inventory: { 
-        equipment: [], 
+        equipment: [
+	    { name: "生鏽匕首", type: "weapon", val: 3, rarity: "common", price: 15, icon: "🗡️" },
+    	    { name: "輕型頭盔", type: "armor", val: 5, rarity: "common", price: 10, icon: "🪖" }
+], 
         consumable: [
             { name: "治療藥水", type: "consumable", val: 30, rarity: "common", price: 25, icon: "🧪", desc: "恢復30點生命" }
-        ], 
+],
+
         material: [] 
     },
     buff: null,
     achievements: new Set(),
     history: { items: new Set() },
     kill1000Boss: false,
-    hasTriggeredHiddenWager: false
+    hasTriggeredHiddenWager: false,
+    dailyRefreshCount: 0 
 };
 
 const GameState = {
     phase: "select_race",
+    combatSubPhase: null, // [新增] null=主選單, 'action'=攻擊選單, 'skill'=技能選單
     currentEnemy: null,
     merchantStock: [],
     log: [],
-    isLoading: false
+    isLoading: false,
+    skipNextRegen: false // [新增] 用來控制戰鬥勝利後是否跳過 nextEvent 的回血
 };
 
 const Game = {
     init() {
-        // 自動檢查存檔
+        // --- 1. 自動檢查存檔 ---
         if (localStorage.getItem('fantasy_adventure_save')) {
             this.loadGame();
         } else {
-            this.updateUI(); // 預設顯示職業選擇
+            // 如果沒有存檔，執行初始化設置
+            this.updateUI();
+            
+            // --- 2. 顯示種族選擇畫面 ---
+            // 這是修正：確保在沒有存檔時，選單會手動顯示出來
+            document.getElementById('race-modal').style.display = 'flex'; 
+        }
+        
+        // --- 3. GM 模式自動檢查與啟動 (L230) ---
+        if (localStorage.getItem('gm_enabled') === 'true') {
+            GM.toggle(true);
         }
     },
 
     // --- Save & Load System (Encrypted) ---
     saveGame() {
-        if (Player.hp <= 0) {
+
+    if (Player.hp <= 0 || GameState.phase === 'dead') {
             // 死亡時清除存檔
             localStorage.removeItem('fantasy_adventure_save');
             return;
@@ -904,8 +1185,8 @@ const Game = {
         document.getElementById('orientation-modal').style.display = 'flex';
 
         // 性別效果處理
-        if (genderType === 'male') Player.baseAtk += 2;
-        if (genderType === 'female') { Player.maxHp += 20; Player.hp += 20; }
+        if (genderType === 'male') Player.baseAtk += 10;
+        if (genderType === 'female') { Player.maxHp += 40; Player.hp += 40; }
         // 無性別與非二元在戰鬥中處理
     },
 
@@ -951,10 +1232,10 @@ const Game = {
         }
     },
 
-    showFloatingText(text, color) {
+    showFloatingText(text, color, type = 'dmg-out') { // [修改] 新增 type 參數，預設為 dmg-out (玩家輸出/治療)
         const display = document.getElementById('event-display');
         const div = document.createElement('div');
-        div.className = 'floating-text';
+        div.className = `floating-text ${type}`; // 應用新的類型
         div.innerHTML = text;
         div.style.color = color;
         display.appendChild(div);
@@ -971,53 +1252,101 @@ const Game = {
      * 重新計算 MaxHP 並根據比例調整 CurrentHP
      */
     recalcStats() {
-        // 1. 儲存當前血量比例
-        const currentRatio = Player.maxHp > 0 ? Player.hp / Player.maxHp : 1; 
+        // 1. 儲存當前血量與魔力比例 (以便在上限改變時維持當前百分比，或單純維持數值)
+        const currentHpRatio = Player.maxHp > 0 ? Player.hp / Player.maxHp : 1;
+        // 選擇方案：魔力通常是維持數值不變，而不是維持比例，這裡我們維持當前數值
+        // 如果您希望升級時魔力也自動補滿比例，可以參考 HP 的做法
 
-        // 2. 計算新的 MaxHP
+        // 2. 計算新的 MaxHP (保持原本邏輯)
         let bonusHp = Player.equipment.armor ? Player.equipment.armor.val : 0;
-        
-        // [修正] 加入女性 MaxHP 加成
-        const genderHp = Player.gender === 'female' ? 20 : 0; 
-        
-        // [修正] 基礎 MaxHP 調整為 100 + 護甲 + 性別加成
-        const newMaxHp = 100 + bonusHp + genderHp; 
-        
-        // 3. 應用新的 MaxHP
+        const genderHp = Player.gender === 'female' ? 40 : 0; 
+        const newMaxHp = 100 + bonusHp + genderHp;
         Player.maxHp = newMaxHp;
-        // 4. 根據舊比例計算新的 CurrentHP
-        let newHp = Math.round(currentRatio * Player.maxHp);
-        // 5. 確保 CurrentHP 不超過 MaxHP
+        
+        // 3. 更新當前 HP (保持原本邏輯)
+        let newHp = Math.round(currentHpRatio * Player.maxHp);
         Player.hp = Math.min(newHp, Player.maxHp);
-        // 6. 確保 CurrentHP 不為負
         if (Player.hp < 0) Player.hp = 0;
+
+        // ==========================================
+        // [新增] MaxMP 成長機制
+        // ==========================================
+        // 基礎魔力 120 + 每層增加 1 點上限
+        const baseMp = 120;
+        const depthBonus = Player.depth * 1; 
+        
+        // 您也可以在這裡加入裝備加成 (如果未來有加魔力的裝備)
+        // let equipMp = ...
+        
+        Player.maxMp = baseMp + depthBonus;
+
+        // 確保當前魔力不超過新的上限
+        if (Player.mp > Player.maxMp) {
+            Player.mp = Player.maxMp;
+        }
+        // ==========================================
         
         this.updateStatsUI();
     },
-
-    nextEvent() {
+	nextEvent() {
         if (Player.hp <= 0) {
             this.restart();
             return;
         }
 
         Player.depth++;
+
+        // ==========================================
+        // 1. [關鍵新增] 過層後立即重新計算屬性
+        // 這會觸發 recalcStats，讓 MaxMP = 100 + 層數
+        // ==========================================
+        this.recalcStats(); 
+
+        // ==========================================
+        // 2. 過層回魔 (固定 +5) - 維持您原本的延遲效果
+        // ==========================================
+        if (Player.mp < Player.maxMp) {
+            let mpRegen = 5; 
+            setTimeout(() => {
+                if (Player.hp <= 0 || GameState.phase === 'dead') return;
+                
+                // 這裡會根據新的 MaxMP 進行補魔
+                Player.mp = Math.min(Player.maxMp, Player.mp + mpRegen);
+                
+                this.showFloatingText(`+${mpRegen} MP`, "#2196f3", 'dmg-out');
+                this.updateUI();
+            }, 150);
+        }
+
         this.checkAchievements();
         this.log(`>>> 進入第 ${Player.depth} 層探索...`);
-        
-        // Passive: Elf Regen (Event based)
-        if (Player.race === 'elf' || (Player.buff && Player.buff.id === 'angel_song')) {
-            let healAmount = 0;
-            if (Player.race === 'elf') healAmount += Math.floor(Player.maxHp * 0.05); // Elf 5%
-            if (Player.buff && Player.buff.id === 'angel_song') healAmount += 5; // Buff +5
 
-            if (Player.hp < Player.maxHp) {
-                Player.hp = Math.min(Player.maxHp, Player.hp + healAmount);
-                this.showFloatingText(`+${healAmount} HP`, "#69f0ae");
+        // ==========================================
+        // 3. 精靈被動與事件邏輯 (保持原樣)
+        // ==========================================
+        
+        // [精靈回血]
+        if (GameState.skipNextRegen) {
+            GameState.skipNextRegen = false;
+        } else {
+            if (Player.race === 'elf' || (Player.buff && Player.buff.id === 'angel_song')) {
+                let healAmount = 0;
+                if (Player.race === 'elf') healAmount += Math.floor(Player.maxHp * 0.05);
+                if (Player.buff && Player.buff.id === 'angel_song') healAmount += 20;
+                
+                if (Player.hp < Player.maxHp) {
+                    // 延遲 0.3 秒回血
+                    setTimeout(() => {
+                        if (Player.hp <= 0 || GameState.phase === 'dead') return;
+                        Player.hp = Math.min(Player.maxHp, Player.hp + healAmount);
+                        this.showFloatingText(`+${healAmount} HP`, "#69f0ae");
+                        this.updateUI();
+                    }, 300);
+                }
             }
         }
 
-        // Event Logic
+        // [事件機率判斷]
         if (Player.depth >= 1000 && (Player.depth - 1000) % 500 === 0) {
             this.triggerCombat(true, true);
             this.updateUI();
@@ -1041,14 +1370,7 @@ const Game = {
         }
 
         const rand = Math.random();
-        // Probabilities
-        // Heal: 0.05 (5%)
-        // Statue: 0.05 (5%)
-        // Class Event: 0.03 (3%)
-        // Merchant: 0.17 (17%)
-        // Chest: 0.10 (10%)
-        // Combat: 0.60 (60%)
-
+        // Probabilities: Heal 5%, Statue 5%, Class 3%, Merchant 17%, Chest 10%, Combat 60%
         if (rand < 0.05) {
             this.triggerHeal();
         } else if (rand < 0.10) {
@@ -1325,6 +1647,9 @@ const Game = {
 
     triggerMerchant() {
         GameState.phase = "merchant";
+        Player.dailyRefreshCount = 0; 
+        // ----------------------------------------
+        
         this.generateMerchantStock();
         this.triggerAnim('event-icon', 'anim-spawn');
         this.renderEvent("💰 神秘商人", "「素材可是很值錢的，要賣一些嗎？」", "點擊商品可查看詳情與購買", "👳");
@@ -1384,6 +1709,14 @@ const Game = {
         area.innerHTML = "";
         area.classList.remove('hidden');
         
+        // 1. 計算最大刷新次數
+        let maxRefreshes = 1; // 基礎 1 次 (0-100 層)
+        if (Player.depth > 100) maxRefreshes = 2; // 101-300 層 2 次
+        if (Player.depth > 300) maxRefreshes = 3; // 301 層以上 3 次
+        
+        const remaining = maxRefreshes - Player.dailyRefreshCount;
+        
+        // 2. 渲染購買區
         let buyHtml = "<h4>購買商品</h4><div class='merchant-grid'>";
         GameState.merchantStock.forEach((item, idx) => {
             if (!item) {
@@ -1391,15 +1724,16 @@ const Game = {
                  buyHtml += `<div class="merchant-item" style="opacity:0; pointer-events:none;"></div>`;
                  return;
             }
+         
             const desc = this.getItemDesc(item);
             const rarityColor = CONFIG.rarityDisplay[item.rarity].color;
             
-            // [新增] 顯示打折價格
+            // 顯示打折價格
             let displayPrice = item.price;
             let priceClass = "gold-text";
             if (Player.orientation === 'homo') {
                 displayPrice = Math.floor(item.price * 0.9);
-                priceClass = "heal-text"; // 用綠色顯示優惠價
+                priceClass = "heal-text";
             }
 
             buyHtml += `<div class="merchant-item ${rarityColor}" onclick="Game.buyItem(${idx})">
@@ -1412,15 +1746,23 @@ const Game = {
         });
         buyHtml += "</div>";
         
+        // 3. 渲染出售區和刷新按鈕 (這是缺失的部分)
         buyHtml += `<div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
             <h4>出售</h4>
             <button onclick="Game.sellAllMaterials()" style="padding:5px 10px; font-size:0.8em; background:#d32f2f;">一鍵出售素材</button>
         </div>
+        
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+            <h4>商店刷新</h4>
+            <button onclick="Game.refreshMerchant()" ${remaining <= 0 ? 'disabled' : ''} style="padding:5px 10px; font-size:0.9em; background:#00bcd4;">
+                🔄 刷新 (${remaining} / ${maxRefreshes})
+            </button>
+        </div>
+        
         <p style='font-size:0.8em; color:#888'>點擊下方背包物品即可出售。</p>`;
         
         area.innerHTML = buyHtml;
     },
-
    buyItem(idx) {
         let item = GameState.merchantStock[idx];
         if (!item) return;
@@ -1445,7 +1787,7 @@ const Game = {
                              `\n「客官，這件商品是非賣品。但看你有緣，要不要賭一把？」\n\n` +
                              `代價：梭哈！(花費身上所有金幣: ${cost} G)\n` +
                              `獎品：傳說中的妖刀\n` +
-                             `機率：1% (天選之人必中) \n\n` +
+                             `機率：1%  \n\n` +
                              `要賭上一切嗎？`;
             if (!confirm(confirmMsg)) {
                 return; // 玩家取消
@@ -1455,24 +1797,13 @@ const Game = {
             Player.gold = 0;
             this.showFloatingText(`-${cost} G (梭哈)`, "red");
 
-            // 4. 計算中獎結果 (邏輯不變)
-            let isWin = false;
-            // 判斷是否為「天選之人」 (精靈 + 女性 + 盜賊 + 異性戀)
-            const isChosenOne = (
-                Player.race === 'elf' &&
-                Player.gender === 'female' &&
-                Player.class === 'thief' &&
-                Player.orientation === 'hetero'
-            );
-            if (isChosenOne) {
-                isWin = true; // 天選之人必中 (100%)
-                console.log("觸發隱藏條件：天選之人必中！");
-            } else {
-                // 一般人只有 1% 機率
-                if (Math.random() < 0.01) {
-                    isWin = true;
-                }
-            }
+	    // 4. 計算中獎結果 (移除天選之人設定，所有玩家統一機率)
+	    let isWin = false;
+
+	    // 所有玩家都只有 1% 機率中獎 (可在此處調整機率)
+	    if (Math.random() < 0.01) { // 0.01 代表 1%
+    	        isWin = true;
+	    }
 
             // 5. 結算
             if (isWin) {
@@ -1552,11 +1883,12 @@ const Game = {
         });
         Player.inventory.material = keptItems;
         Player.gold += total;
-        this.showFloatingText("+ " + total + " G", "yellow");
+	this.showFloatingText(`+${total} G`, "yellow", 'dmg-in');
         this.log(`出售了所有素材，獲得 ${total} G`);
         this.updateUI();
     },
 
+	// [修改] 出售物品 (支援堆疊扣除)
     sellItem(index, category) {
         if (GameState.phase !== "merchant") return;
         const item = Player.inventory[category][index];
@@ -1570,17 +1902,39 @@ const Game = {
         if (['weapon', 'armor', 'shield', 'consumable'].includes(item.type)) {
             price = Math.floor(price * 0.8);
         }
-        
         if (Player.class === 'merchant') {
             price = Math.floor(price * 1.2);
         }
         
         if(confirm(`確定要以 ${price} G 出售 ${item.name} 嗎？`)) {
-            Player.inventory[category].splice(index, 1);
             Player.gold += price;
+            
+            // [重點] 扣除數量
+            if (item.count > 1) {
+                item.count--;
+            } else {
+                Player.inventory[category].splice(index, 1);
+            }
+
             this.showFloatingText("+ " + price + " G", "yellow");
             this.log(`出售 ${item.name} 獲得 ${price} G`);
             this.updateUI();
+        }
+    },
+
+    refreshMerchant() {
+        let maxRefreshes = 1;
+        if (Player.depth > 100) maxRefreshes = 2;
+        if (Player.depth > 300) maxRefreshes = 3;
+        
+        if (Player.dailyRefreshCount < maxRefreshes) {
+            Player.dailyRefreshCount++;
+            this.generateMerchantStock();
+            this.renderMerchantShop();
+            this.showFloatingText(`商店已刷新！`, "#00bcd4");
+            this.updateUI();
+        } else {
+            alert("今日刷新額度已用完！");
         }
     },
 
@@ -1608,7 +1962,7 @@ const Game = {
             const amount = Math.floor(Math.random() * 50) + 10 + (Player.depth * 2);
             Player.gold += amount;
             desc = `獲得了 <span class='gold-text'>${amount} G</span>`;
-            this.showFloatingText(`+${amount} G`, "#ffd700");
+	    this.showFloatingText(`+${amount} G`, "#ffd700", 'dmg-in');
         } else if (safeRoll < 0.60) {
             const item = this.generateSpecificItem(['consumable']);
             this.addItemToInventory(item);
@@ -1680,44 +2034,53 @@ const Game = {
             }
         }
 
-        // --- [修改後的數值計算邏輯] ---
         let hpMul = 1, atkMul = 1;
         let namePrefix = "";
         
-        // 1. 全域成長係數：讓怪物隨層數變強 (每層增加 2% 血量, 1.5% 攻擊力)
-        let globalHpScale = 1 + (Player.depth * 0.02); 
-        let globalAtkScale = 1 + (Player.depth * 0.015);
+        // 1. 全域成長係數：採用低基礎，且加速點延後
+        
+        let growthRateHP = 0.007; // 基礎每層 0.7% (原 1%)
+        let growthRateATK = 0.005; // 基礎每層 0.5% (原 0.8%)
 
-        hpMul *= globalHpScale;
-        atkMul *= globalAtkScale;
+        // 成長加速點延後到 301 層開始
+        if (Player.depth > 300) {
+            // 從 301 層開始，每 100 層的成長倍率提升 1.5 倍
+            let bonusRate = 1 + ((Player.depth - 300) / 100) * 0.5;
+            growthRateHP *= bonusRate;
+            growthRateATK *= bonusRate;
+        }
 
-        // 2. 深淵成長係數：500 層後開始計算額外倍率
+        let globalHpScale = 1 + (Player.depth * growthRateHP);
+        let globalAtkScale = 1 + (Player.depth * growthRateATK);
+        
+        // 確保至少有 1 倍
+        hpMul *= Math.max(1, globalHpScale);
+        atkMul *= Math.max(1, globalAtkScale);
+
+
+	// 2. 深淵成長係數：500 層後 (HP 變硬，ATK 成長趨緩)
         if (Player.depth > 500) {
-            let abyssDepth = Player.depth - 500; // 從 1 開始
+            let abyssDepth = Player.depth - 500;
             
-            // 計算額外倍率: 初始 1.5 + (每 50 層額外 0.1)
-            // Math.floor(abyssDepth / 50) 確保每 50 層只增加一次
-            let bonusMultiplier = Math.floor(abyssDepth / 50) * 0.1;
-            
-            // 基礎深淵倍率
-            let abyssBaseMul = 1.5;
+            // HP 維持高成長 (1.5倍起跳)
+            let finalHpScale = 1.5 + (Math.floor(abyssDepth / 50) * 0.1);
 
-            // 最終深淵係數
-            let finalAbyssScale = abyssBaseMul + bonusMultiplier;
+            // ATK 改為低成長 (1.1倍起跳)
+            let finalAtkScale = 1.1 + (Math.floor(abyssDepth / 100) * 0.05);
 
-            hpMul *= finalAbyssScale;
-            atkMul *= finalAbyssScale;
+            hpMul *= finalHpScale;
+            atkMul *= finalAtkScale; // 這樣攻擊力就不會直接乘 1.5 了
             namePrefix += "深淵 ";
         }
 
-        // 3. 階級加成 (保持原有倍率或根據喜好調整，這裡使用原有倍率)
+        // 3. 階級加成 (再次降低菁英怪的威脅性，讓中期戰鬥更可行)
         if (tier === "elite") { 
-            hpMul *= 2;
-            atkMul *= 1.5; 
+            hpMul *= 1.4; // 原 1.8，降為 1.4 倍
+            atkMul *= 1.2; // 原 1.3，降為 1.2 倍
             namePrefix += "菁英 "; 
         } else if (tier === "boss") { 
-            hpMul *= 3;
-            atkMul *= 2; 
+            hpMul *= 2.0; // 原 2.5，降為 2.0 倍
+            atkMul *= 1.5; // 原 1.8，降為 1.5 倍
             namePrefix += "首領 "; 
         }
         // --- [修改後的數值計算邏輯 結束] ---
@@ -1732,8 +2095,8 @@ const Game = {
         };
         // ... (後續代碼不變)
         if (checkTrueForm) {
-            const hasSword = Player.equipment.weapon && Player.equipment.weapon.name === "聖劍 Excalibur";
-            const hasArmor = Player.equipment.armor && Player.equipment.armor.name === "神之光輝";
+            const hasSword = Player.equipment.weapon && Player.equipment.weapon.name === "妖刀村正";
+            const hasArmor = Player.equipment.armor && Player.equipment.armor.name === "守衛者鎧甲";
             
             if (hasSword && hasArmor) {
                 enemy.name = "魔王真身";
@@ -1752,124 +2115,293 @@ const Game = {
 
         document.getElementById('event-icon').className = iconClass;
         this.triggerAnim('event-icon', 'anim-spawn');
+        
+        // [新增] 初始化戰鬥子狀態為 "main" (主選單)
+        GameState.phase = "combat";
+
         this.renderEvent(`⚔️ 遭遇 ${GameState.currentEnemy.name}`, 
             `HP: ${GameState.currentEnemy.hp} | 攻擊: ${GameState.currentEnemy.atk}`, 
             "準備戰鬥！", GameState.currentEnemy.icon);
-        this.setButtons("戰鬥", "combatRound", "逃跑", "flee", !canFlee);
+            
+        // [新增] 改為呼叫戰鬥選單渲染函式
+        this.renderCombatMenu(); 
+    },
+    
+// [修改] 扁平化戰鬥選單：直接顯示技能與普攻/逃跑按鈕
+    renderCombatMenu() {
+        if (GameState.phase !== 'combat') return;
+
+        // 1. 判斷是否為 Boss (Boss 不能逃跑)
+        const isBoss = GameState.currentEnemy.tier === "boss";
+        const canFlee = !isBoss; 
+
+        // 2. 設定按鈕：左邊普攻，右邊逃跑
+        // 注意：技能是透過點擊文字區塊觸發，不占用下方按鈕空間
+        this.setButtons("⚔️ 普通攻擊", "combatRoundNormal", "逃跑", "flee", !canFlee);
+
+        // 3. 直接渲染技能列表到事件描述區
+        // 先檢查是否已經有技能列表了，避免重複渲染
+        if (!document.querySelector('.skill-list')) {
+            this.renderSkillList();
+        }
+        
+        // 4. 移除舊的提示文字 (如果還殘留的話)
+        const oldHint = document.querySelector('.combat-hint');
+        if (oldHint) oldHint.remove();
     },
 
-   combatRound() {
+    // 進入行動選單 (按下「戰鬥」後觸發)
+
+    // 執行普通攻擊 (按下「普通攻擊」後觸發)
+    combatRoundNormal() {
+        this.combatRound(null); // 傳入 null 代表普通攻擊
+    },
+
+    // 執行技能攻擊 (點擊具體技能後觸發)
+    combatRoundSkill(skillId) {
+        this.combatRound(skillId);
+    },
+
+// [修改] 渲染技能列表 (追加模式)
+    renderSkillList() {
+        const container = document.getElementById('event-desc');
+        
+        // 建立一個包裝容器，方便管理樣式
+        const skillContainer = document.createElement('div');
+        skillContainer.style.marginTop = "15px"; // 與上方日誌拉開一點距離
+        skillContainer.style.borderTop = "1px solid #444"; // 加一條分隔線好看一點
+        skillContainer.style.paddingTop = "10px";
+        
+        skillContainer.innerHTML = "<p style='margin-bottom:5px;'>請選擇要使用的技能：</p>";
+        
+        const list = document.createElement('div');
+        list.className = 'skill-list';
+
+        // 遍歷玩家擁有的技能
+        if (Player.skills && Player.skills.length > 0) {
+            Player.skills.forEach(sid => {
+                const skill = CONFIG.skills[sid];
+                if (!skill) return;
+                
+                const cost = Number(skill.mpCost) || 0;
+                const currentMp = Number(Player.mp) || 0;
+                const canCast = currentMp >= cost;
+
+                const rarityColor = CONFIG.rarityDisplay[skill.rarity] ? CONFIG.rarityDisplay[skill.rarity].color : "white";
+                
+                const item = document.createElement('div');
+                item.className = `skill-item ${canCast ? '' : 'disabled'}`;
+                item.innerHTML = `
+                    <div style="width:100%">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span class="${rarityColor}" style="font-weight:bold;">${skill.name}</span>
+                            <span class="skill-cost">💧 ${cost} MP</span>
+                        </div>
+                        <div class="skill-desc-box">${skill.desc}</div>
+                    </div>
+                `;
+                
+                if (canCast) {
+                    item.onclick = () => {
+                        // 扣除魔力並執行技能
+                        Player.mp -= cost;
+                        this.updateStatsUI();
+                        this.combatRoundSkill(sid);
+                    };
+                }
+                
+                list.appendChild(item);
+            });
+        } else {
+            skillContainer.innerHTML += "<p style='color:#888; font-size:0.8em;'>你還沒有學會任何技能...</p>";
+        }
+
+        skillContainer.appendChild(list);
+        container.appendChild(skillContainer); // [關鍵] 這裡是用 appendChild 追加到最後面
+    },
+// [新增] 刷新技能按鈕的狀態 (亮起/反灰)
+    refreshSkillState() {
+        // 找到所有技能按鈕
+        const items = document.querySelectorAll('.skill-item');
+        // 取得目前的技能 ID 列表
+        const skillIds = Player.skills;
+
+        items.forEach((item, index) => {
+            const sid = skillIds[index];
+            if (!sid) return;
+            
+            const skill = CONFIG.skills[sid];
+            const cost = Number(skill.mpCost) || 0;
+            const currentMp = Number(Player.mp) || 0;
+            const canCast = currentMp >= cost;
+
+            // 更新樣式
+            if (canCast) {
+                item.classList.remove('disabled');
+                // 重新綁定點擊事件 (確保狀態正確)
+                item.onclick = () => {
+                    Player.mp -= cost;
+                    this.updateStatsUI();
+                    this.combatRoundSkill(sid);
+                };
+            } else {
+                item.classList.add('disabled');
+                item.onclick = null; // 移除點擊事件
+            }
+        });
+    },
+// [修改] 必須接收 skillId 參數，預設為 null (代表普攻)
+    combatRound(skillId = null) {
         if (GameState.phase !== "combat") return;
         const enemy = GameState.currentEnemy;
         let logHtml = "";
+        let pDmg = 0;       // 玩家造成的傷害
+        let isHeal = false; // 是否為純治療技能
 
-        // --- 1. 回合開始效果 (Start of Turn) ---
-
-        // [精靈] 被動：再生 (5%)
-        if (Player.race === 'elf') {
-            let regen = Math.floor(Player.maxHp * 0.05);
-            if(Player.hp < Player.maxHp) {
-                Player.hp = Math.min(Player.maxHp, Player.hp + regen);
-                logHtml += `<span class='heal-text'>[精靈再生] 恢復 ${regen} HP</span><br>`;
-            }
+        // [新增] 自然回魔 (每回合 +5)
+        // ==========================================
+        if (Player.mp < Player.maxMp) {
+            let mpRegen = 5;
+            // 設定 0.15 秒 (150ms) 延遲，錯開精靈再生(300ms)
+            setTimeout(() => {
+                // 防呆：如果人死了就不回魔
+                if (Player.hp <= 0 || GameState.phase === 'dead') return;
+                
+                Player.mp = Math.min(Player.maxMp, Player.mp + mpRegen);
+                
+                // 顯示藍色文字 (#2196f3)，使用 dmg-out (左側飄字)
+                this.showFloatingText(`+${mpRegen} MP`, "#2196f3", 'dmg-out');
+                this.updateUI();
+	// 🚨 [新增這行] 回魔後，立刻檢查技能按鈕是否該亮起來！
+                this.refreshSkillState();
+            }, 150);
+            
+            // 寫入戰鬥日誌
+            logHtml += `<span style='color:#2196f3'>[自然回復] 恢復 ${mpRegen} MP</span><br>`;
         }
+        // ==========================================
+
+        // --- 1. 回合開始效果 ---
         
-        // [非二元性別] 被動：隨機獲得金幣
+        // [非二元性別] 被動
         if (Player.gender === 'nonbinary') {
-            let bonusG = Math.floor(Math.random() * 5) + 1;
+            let bonusG = Math.floor(Math.random() * 10) + 1;
             Player.gold += bonusG;
             logHtml += `<span style="color:#ff69b4">[非二元優勢] 獲得 ${bonusG} G</span><br>`;
+            setTimeout(() => { this.showFloatingText(`+${bonusG} G`, "#ff69b4", 'dmg-in'); }, 300);
         }
 
-        // --- 2. 玩家攻擊計算 (Player Attack) ---
+        // --- 2. 玩家攻擊計算 (區分技能與普攻) ---
 
-        let pDmg = this.getAtk();
-        let pCritRate = 0.05;
-
-        // 種族與裝備加成
-        if (Player.race === 'human') pCritRate += 0.20;
-        if (Player.equipment.weapon && Player.equipment.weapon.name === "妖刀村正") pCritRate += 0.20;
-
-        // Buff 狀態加成
-        if (Player.buff) {
-            if (Player.buff.id === 'angel_courage') pCritRate = 0.2;
-            if (Player.buff.id === 'demon_enhance') pCritRate = 0.5;
-
-            // 惡魔財富效果
-            if (Player.buff.id === 'demon_wealth') {
-                Player.gold += 5;
-                this.showFloatingText("+5 G", "gold");
-                logHtml += `<span class='demon-text'>[惡魔財富]</span> 獲得 5 G<br>`;
+        if (skillId) {
+            // [技能傷害計算]
+            const skill = CONFIG.skills[skillId];
+            const effect = skill.effect(Player, enemy);
+            
+            if (effect.flatDmg) pDmg += effect.flatDmg;
+            if (effect.dmgMult) pDmg += Math.floor(this.getAtk() * effect.dmgMult);
+            
+            if (effect.healPct) {
+                let heal = Math.floor(Player.maxHp * effect.healPct);
+                Player.hp = Math.min(Player.maxHp, Player.hp + heal);
+                this.showFloatingText(`+${heal} HP`, "#69f0ae", 'dmg-out');
+                logHtml += `<span class='heal-text'>[技能] ${skill.name}: 恢復 ${heal} HP</span><br>`;
+                isHeal = true;
             }
             
-            // 惡魔破壞效果 (秒殺判定)
-            if (Player.buff.id === 'demon_destruction') {
-                if (Math.random() < 0.1) {
-                    enemy.hp = 0;
-                    let pain = Math.floor(Player.hp * 0.9);
-                    Player.hp -= pain;
-                    this.showFloatingText(`-${pain} HP`, "darkred");
-                    logHtml += `<span class='demon-text'>[惡魔破壞]</span> 觸發秒殺！自身扣除 ${pain} HP。<br>`;
-                    this.combatWin();
-                    this.updateUI();
-                    return;
+            if (!isHeal) {
+                // 1. 先顯示技能名稱與描述 (移除原本結尾的 <br>)
+                logHtml += `<span style="color:#4fc3f7">[技能] ${skill.name}: ${effect.text}</span>`;
+                
+                // 2. [新增] 如果有造成傷害，補上數值顯示
+                if (pDmg > 0) {
+                    logHtml += ` 對 ${enemy.name} 造成 <span class='damage-text'>${pDmg}</span> 點傷害。`;
+                } else {
+                    // 如果是單純加 Buff 或沒傷害的技能 (預留)
+                    logHtml += `。`; 
+                }
+
+                // 3. 最後才換行
+                logHtml += `<br>`;
+
+                // 如果有動畫設定 (如火球術)
+                if (effect.anim) this.triggerAnim('event-icon', effect.anim); 
+            }
+
+        } else {
+            // [普通攻擊計算]
+            pDmg = this.getAtk();
+            let pCritRate = 0.05;
+
+            if (Player.race === 'human') pCritRate += 0.25;
+            if (Player.equipment.weapon && Player.equipment.weapon.name === "妖刀村正") pCritRate += 0.20;
+
+            if (Player.buff) {
+                if (Player.buff.id === 'angel_courage') pCritRate = 0.2;
+                if (Player.buff.id === 'demon_enhance') pCritRate = 0.5;
+                
+                if (Player.buff.id === 'demon_wealth') {
+                    Player.gold += 5;
+                    setTimeout(() => { this.showFloatingText("+5 G", "gold", 'dmg-in'); }, 150);
+                    logHtml += `<span class='demon-text'>[惡魔財富]</span> 獲得 5 G<br>`;
+                }
+                
+                if (Player.buff.id === 'demon_destruction') {
+                    if (Math.random() < 0.1) {
+                        enemy.hp = 0;
+                        let pain = Math.floor(Player.hp * 0.9);
+                        Player.hp -= pain;
+                        this.showFloatingText(`-${pain} HP`, "darkred");
+                        logHtml += `<span class='demon-text'>[惡魔破壞]</span> 觸發秒殺！自身扣除 ${pain} HP。<br>`;
+                        this.combatWin();
+                        this.updateUI();
+                        return;
+                    }
+                }
+            }
+
+            let pCrit = Math.random() < pCritRate;
+            if (pCrit) {
+                pDmg *= 2;
+                if (Player.orientation === 'hetero') {
+                    pDmg = Math.floor(pDmg * 1.2);
+                    logHtml += `<span style="color:#e91e63">[異性戀之力] 暴擊傷害大幅提升!</span><br>`;
+                }
+            }
+            
+            logHtml += `你對 ${enemy.name} 造成 ${pCrit ? "<span class='crit-text'>爆擊 " : ""}${pDmg}${pCrit ? "</span>" : ""} 點傷害。<br>`;
+        }
+
+        // --- 結算傷害與吸血 ---
+        if (pDmg > 0) {
+            enemy.hp -= pDmg;
+            this.triggerAnim('event-icon', 'anim-damage');
+            this.showFloatingText(pDmg, "white", 'dmg-out');
+            
+            if (Player.race === 'demon') {
+                let steal = Math.floor(pDmg * 0.15);
+                if (steal > 0) {
+                    Player.hp = Math.min(Player.maxHp, Player.hp + steal);
+                    this.showFloatingText(`+${steal} HP`, "#ef5350", 'dmg-out');
+                    logHtml += `<span class='demon-text'>[生命偷取] 吸取 ${steal} HP</span><br>`;
                 }
             }
         }
 
-        // 暴擊判定
-        let pCrit = Math.random() < pCritRate;
-        if (pCrit) {
-            pDmg *= 2;
-            // [新增] [異性戀] 被動：暴擊傷害加成 (1.2倍)
-            if (Player.orientation === 'hetero') {
-                pDmg = Math.floor(pDmg * 1.2); 
-                logHtml += `<span style="color:#e91e63">[異性戀之力] 暴擊傷害大幅提升!</span><br>`;
-            }
-        }
-        
-        // 扣除敵人血量
-        enemy.hp -= pDmg;
-
-        // [修復] [魔族] 被動：吸血效果 (明確顯示浮動文字)
-        if (Player.race === 'demon') {
-            let steal = Math.floor(pDmg * 0.15);
-            if (steal > 0) {
-                // 即使滿血也顯示數字，增加回饋感
-                let oldHp = Player.hp;
-                Player.hp = Math.min(Player.maxHp, Player.hp + steal);
-                // 顯示紅色吸血字樣
-                this.showFloatingText(`+${steal} HP`, "#ef5350"); 
-                logHtml += `<span class='demon-text'>[生命偷取] 吸取 ${steal} HP</span><br>`;
-            }
-        }
-        
-        // 顯示玩家攻擊動畫與文字
-        this.triggerAnim('event-icon', 'anim-damage');
-        this.showFloatingText(pDmg, pCrit ? "red" : "white");
-        logHtml += `你對 ${enemy.name} 造成 ${pCrit ? "<span class='crit-text'>爆擊 " : ""}${pDmg}${pCrit ? "</span>" : ""} 點傷害。<br>`;
-        
         // 判定敵人死亡
         if (enemy.hp <= 0) {
             this.combatWin();
             return;
         }
 
-        // --- 3. 怪物攻擊計算 (Enemy Attack) ---
-
+        // --- 3. 怪物攻擊 (Enemy Attack) ---
         let mDmg = enemy.atk;
         let mCritRate = 0.1;
         
-        // 怪物 Buff 加成
         if (Player.buff && Player.buff.id === 'demon_enhance') mCritRate = 0.5;
         if (Player.buff && Player.buff.id === 'angel_protection') mDmg = Math.floor(mDmg * 0.7);
-        
-        // [無性別] 被動：減傷 5%
-        if (Player.gender === 'none') {
-            mDmg = Math.floor(mDmg * 0.95);
-        }
+        if (Player.gender === 'none') mDmg = Math.floor(mDmg * 0.90);
 
-        // 怪物暴擊判定
         let mCrit = Math.random() < mCritRate;
         if (mCrit) mDmg *= 2;
 
@@ -1877,17 +2409,14 @@ const Game = {
         let s = Player.equipment.shield;
         this.triggerAnim('event-icon', 'anim-lunge');
 
-        // 盾牌格擋邏輯
         if (s && s.val > 0) {
              s.val--;
-             // 傳說盾牌不會被穿透，其他盾牌遇暴擊會被穿透
              let isPierced = (mCrit && s.name !== "埃癸斯之盾" && s.name !== "冥王之盾");
-             
              if (isPierced) {
                  logHtml += `<span class='pierce-text'>⚡ 致命一擊貫穿了盾牌！</span><br>`;
              } else {
                  applyDamage = false;
-                 this.showFloatingText("格擋!", "#2196f3");
+                 this.showFloatingText("格擋!", "#2196f3", 'dmg-in');
                  logHtml += `<span class='block-text'>🛡️ 盾牌抵擋了攻擊！</span> (剩餘耐久: ${s.val})<br>`;
              }
 
@@ -1898,45 +2427,73 @@ const Game = {
              }
         }
 
-        // 結算所受傷害
         if (applyDamage) {
-            // [修正] [半獸人] 被動：減傷 (只需在此處應用一次最終減免)
             if (Player.race === 'orc') {
-                let reduced = Math.floor(mDmg * 0.20); // 20% 減免
+                let reduced = Math.floor(mDmg * 0.20);
                 mDmg -= reduced;
             }
 
             Player.hp -= mDmg;
             this.triggerAnim('game-container', 'anim-screen-shake');
-            this.showFloatingText(`-${mDmg}`, "red");
+            this.showFloatingText(`-${mDmg}`, "red", 'dmg-in');
+            
             logHtml += `${enemy.name} 攻擊！造成 ${mCrit ? "<span class='crit-text'>致命 " : ""}${mDmg}${mCrit ? "</span>" : ""} 點傷害。`;
             if (Player.race === 'orc') logHtml += ` (獸人硬皮)`;
             if (Player.gender === 'none') logHtml += ` (心如止水)`;
         }
-        
-        // [修改] 顯示攻擊力：更新 UI 標題與副標題
+
+        // --- [精靈再生] ---
+        if (Player.race === 'elf') {
+            let regen = Math.floor(Player.maxHp * 0.05);
+            if(Player.hp < Player.maxHp) {
+                setTimeout(() => {
+                    if (Player.hp <= 0 || GameState.phase === 'dead') return;
+                    Player.hp = Math.min(Player.maxHp, Player.hp + regen);
+                    this.showFloatingText(`+${regen} HP (再生)`, "#69f0ae", 'dmg-out');
+                    this.updateUI();
+                }, 300);
+                logHtml += `<br><span class='heal-text'>[精靈再生] 恢復 ${regen} HP</span>`;
+            }
+        }
+
+
         this.renderEvent(`⚔️ 戰鬥中 - ${enemy.name}`, 
             `HP: ${Math.max(0, enemy.hp)} | <span style="color:#ff5252">攻擊: ${enemy.atk}</span>`, 
             logHtml, enemy.icon);
-
+            
         if (Player.hp <= 0) {
             this.playerDie(`被 ${enemy.name} 殺死`);
         } else {
             this.updateUI();
+            this.renderCombatMenu();
         }
     },
 
     combatWin() {
-        const enemy = GameState.currentEnemy;
-        // --- [新增的精靈戰鬥結束回血邏輯] ---
-        // 修正：確保精靈在戰鬥勝利時也能觸發回血 (5%)
-        if (Player.race === 'elf') {
-            let regen = Math.floor(Player.maxHp * 0.05); 
-            if(Player.hp < Player.maxHp) {
-                Player.hp = Math.min(Player.maxHp, Player.hp + regen);
-                this.showFloatingText(`+${regen} HP (戰鬥勝利回血)`, "#69f0ae");
+        const enemy = GameState.currentEnemy; // 原本的第 1197 行
+        
+        // --- [新增] 戰鬥勝利立即觸發再生 (帶延遲)，並標記跳過下一次 ---
+        if (Player.race === 'elf' || (Player.buff && Player.buff.id === 'angel_song')) {
+            let healAmount = 0;
+            if (Player.race === 'elf') healAmount += Math.floor(Player.maxHp * 0.05);
+            if (Player.buff && Player.buff.id === 'angel_song') healAmount += 10;
+
+            if (Player.hp < Player.maxHp) {
+                // 設定旗標：告訴 nextEvent 這次不用再補了，因為這裡補過了
+                GameState.skipNextRegen = true;
+
+                // 0.3秒延遲顯示特效與數值更新
+                setTimeout(() => {
+                    // 再次防呆，避免極端狀況下報錯
+                    if (Player.hp <= 0 || GameState.phase === 'dead') return;
+
+                    Player.hp = Math.min(Player.maxHp, Player.hp + healAmount);
+                    this.showFloatingText(`+${healAmount} HP (勝利)`, "#69f0ae", 'dmg-out');
+                    this.updateUI(); // 確保血條更新
+                }, 300);
             }
         }
+        
         GameState.phase = "event_end";
         
         if(Player.depth === 1000 && enemy.tier === 'boss') {
@@ -1951,7 +2508,7 @@ const Game = {
         if (enemy.tier === "boss") gold *= 5;
         
         Player.gold += gold;
-        this.showFloatingText(`+${gold} G`, "#ffd700");
+	this.showFloatingText(`+${gold} G`, "#ffd700", 'dmg-in');
         dropText += `金幣 +${gold} <br>`;
 
         if (enemy.isTrueForm) {
@@ -2003,10 +2560,10 @@ const Game = {
     flee() {
         let fleeRate = 0.5;
         if (Player.buff) {
-            if (Player.buff.id === 'angel_wings') fleeRate = 0.6;
+            if (Player.buff.id === 'angel_wings') fleeRate = 0.7;
             if (Player.buff.id === 'demon_wager') {
-                fleeRate = 0.8;
-                if (Math.random() < 0.01) {
+                fleeRate = 0.85;
+                if (Math.random() < 0.015) {
                     Player.hp = 0;
                     this.playerDie("死於惡魔賭約");
                     return;
@@ -2028,7 +2585,7 @@ const Game = {
             this.triggerAnim('event-icon', 'anim-lunge');
             if (s && s.val > 0) {
                 s.val--;
-                this.showFloatingText("格擋!", "#2196f3");
+		this.showFloatingText("格擋!", "#2196f3", 'dmg-in');
                 msg = `逃跑失敗！但<span class='block-text'>盾牌抵擋了追擊</span>！`;
                 if (s.val <= 0) {
                     msg += `<br><span class='damage-text'>💔 你的 ${s.name} 碎裂了！</span>`;
@@ -2045,7 +2602,7 @@ const Game = {
 
     Player.hp -= mDmg;
     this.triggerAnim('game-container', 'anim-screen-shake');
-                this.showFloatingText(`-${mDmg}`, "red");
+		this.showFloatingText(`-${mDmg}`, "red", 'dmg-in');
                 msg = `逃跑失敗！被 ${enemy.name} 攻擊造成 ${mDmg} 傷害。`;
                 if (Player.buff && Player.buff.id === 'demon_wealth') {
                     if (Player.gold >= 5) {
@@ -2061,6 +2618,9 @@ const Game = {
             } else {
                 this.renderEvent(`⚔️ ${enemy.name}`, `敵方 HP: ${enemy.hp}`, msg, enemy.icon);
                 this.updateUI();
+                
+                // 🚨🚨🚨 [新增這行] 重新渲染戰鬥選單 (包含技能列表) 🚨🚨🚨
+                this.renderCombatMenu(); 
             }
         }
     },
@@ -2101,19 +2661,69 @@ const Game = {
     generateRandomItem(tierModifier = "normal") {
         const r = Math.random();
         let rarityKey = "common";
-        let table = CONFIG.rarityProb;
+        
+        // 1. 複製基礎機率表
+        let dynamicTable = { ...CONFIG.rarityProb };
+        
+        // 2. 應用深度成長邏輯 (Dynamic Scaling)
+        let reductionFactor = 0;
+        
+        if (Player.depth > 100) {
+            // 從 101 層開始計算降低的比例
+            // 在 300 層 (200 / 200) 達到 100% 削減
+            reductionFactor = Math.min(1, (Player.depth - 100) / 200); 
+        }
+        
+        // 削減 low/uncommon 機率，並將機率分配給 high-tier
+        let boostFromLow = 0;
+        
+        if (reductionFactor > 0) {
+            // 削減 low-tier 機率
+            boostFromLow += dynamicTable.common * reductionFactor;
+            dynamicTable.common *= (1 - reductionFactor);
+            
+            boostFromLow += dynamicTable.uncommon * reductionFactor;
+            dynamicTable.uncommon *= (1 - reductionFactor);
+            
+            // 確保 300 層後不再出現 common/uncommon
+            if (Player.depth >= 300) {
+                dynamicTable.common = 0;
+                dynamicTable.uncommon = 0;
+            }
+
+            // 將釋放出的機率 boostFromLow 按比例分配給高稀有度
+            let highTiers = ['rare', 'epic', 'legendary', 'mythic', 'ultra'];
+            let totalHighProb = highTiers.reduce((sum, key) => sum + dynamicTable[key], 0);
+
+            if (totalHighProb > 0) {
+                 // 按現有機率比例，分配 boostFromLow 機率
+                 let boostRatio = 1 + (boostFromLow / totalHighProb);
+                 
+                 dynamicTable.rare *= boostRatio;
+                 dynamicTable.epic *= boostRatio;
+                 dynamicTable.legendary *= boostRatio;
+                 dynamicTable.mythic *= boostRatio;
+                 dynamicTable.ultra *= boostRatio;
+            }
+        }
+        
+        // 3. 重新計算累計機率進行抽獎 (Accrued Probability Check)
         let acc = 0;
-        for (let key in table) {
-            acc += table[key];
+        // 排序確保從高稀有度開始檢查 (更安全)
+        let keys = Object.keys(dynamicTable).sort((a, b) => CONFIG.rarityDisplay[b].val - CONFIG.rarityDisplay[a].val);
+
+        for (let key of keys) {
+            acc += dynamicTable[key];
             if (r <= acc) { rarityKey = key; break; }
         }
 
         if (tierModifier === "boss" && (rarityKey === "common" || rarityKey === "uncommon")) rarityKey = "rare";
+        
         const pool = CONFIG.itemPool.filter(i => i.rarity === rarityKey);
+        // 最終防呆：如果抽到稀有度但池子是空的，嘗試重新抽取
         if (pool.length === 0) return this.generateRandomItem("normal");
 
         const template = pool[Math.floor(Math.random() * pool.length)];
-        // 使用 Object.assign 或深拷貝確保返回一個全新的、非引用的物件。
         return Object.assign({}, template);
     },
 
@@ -2133,15 +2743,37 @@ const Game = {
         return Object.assign({}, template);
     },
 
+	// [修改] 物品堆疊邏輯
     addItemToInventory(item, render = true) {
         Player.history.items.add(item.name);
+        
+        let targetList;
         if (['weapon', 'armor', 'shield'].includes(item.type)) {
-            Player.inventory.equipment.push(item);
+            targetList = Player.inventory.equipment;
         } else if (item.type === 'consumable') {
-            Player.inventory.consumable.push(item);
+            targetList = Player.inventory.consumable;
         } else {
-            Player.inventory.material.push(item);
+            targetList = Player.inventory.material;
         }
+
+        // 1. 尋找是否已有相同的物品
+        // 判斷標準：名稱、稀有度、數值(val)都必須相同
+        // 這就完美解決了盾牌問題：(3/3)的盾牌會疊一起，(2/3)的盾牌因為 val 不同，會另開一格
+        const existingItem = targetList.find(i => 
+            i.name === item.name && 
+            i.rarity === item.rarity && 
+            i.val === item.val
+        );
+
+        if (existingItem) {
+            // 2. 如果有，數量 +1
+            existingItem.count = (existingItem.count || 1) + 1;
+        } else {
+            // 3. 如果沒有，初始化數量為 1 並加入列表
+            item.count = 1;
+            targetList.push(item);
+        }
+
         if (render) this.updateUI();
     },
 
@@ -2162,23 +2794,35 @@ const Game = {
         }
     },
 
+	// [修改] 裝備物品 (支援堆疊拆分)
     equip(index, category) {
-        const item = Player.inventory[category][index];
-        const type = item.type;
-
+        const stackItem = Player.inventory[category][index];
+        if (!stackItem) return;
+        
+        const type = stackItem.type;
         if (!['weapon', 'armor', 'shield'].includes(type)) return;
 
-        // 1. Swap logic
-        if (Player.equipment[type]) this.addItemToInventory(Player.equipment[type], false);
-        Player.equipment[type] = item;
-        Player.inventory[category].splice(index, 1);
+        // 1. 先把身上原本的裝備脫下來 (放回背包，會自動堆疊)
+        if (Player.equipment[type]) {
+            this.addItemToInventory(Player.equipment[type], false);
+        }
+
+        // 2. 準備要裝備的物品 (複製一份，數量設為 1)
+        const itemToEquip = { ...stackItem };
+        itemToEquip.count = 1;
+        Player.equipment[type] = itemToEquip;
+
+        // 3. 處理背包裡的堆疊
+        if (stackItem.count > 1) {
+            stackItem.count--; // 數量大於 1，扣除一個
+        } else {
+            Player.inventory[category].splice(index, 1); // 剩最後一個，直接移除
+        }
         
-        // 2. Render and Recalculate Stats (handles MaxHP/HP ratio)
         this.recalcStats();
         this.updateUI();    
-        this.log(`裝備了 ${item.name}`);
+        this.log(`裝備了 ${itemToEquip.name}`);
     },
-
     unequip(type) {
         if (!Player.equipment[type]) return;
         const item = Player.equipment[type];
@@ -2192,12 +2836,23 @@ const Game = {
         this.log(`卸下了 ${type === 'weapon' ? '武器' : type === 'armor' ? '防具' : '盾牌'}`);
     },
 
+	// [修改] 使用消耗品 (支援堆疊扣除)
     useItem(index, category) {
         const item = Player.inventory[category][index];
+        
         if (item.name.includes("藥水") || item.name.includes("藥劑")) {
+            // 補血邏輯
             let heal = item.val;
+            // 如果是全能藥水或特殊藥水，可能會有不同邏輯，這裡沿用你的基礎回血
             Player.hp = Math.min(Player.maxHp, Player.hp + heal);
-            Player.inventory[category].splice(index, 1);
+            
+            // [重點] 扣除數量邏輯
+            if (item.count > 1) {
+                item.count--;
+            } else {
+                Player.inventory[category].splice(index, 1);
+            }
+
             this.showFloatingText(`+${heal} HP`, "#69f0ae");
             this.updateUI();
         }
@@ -2205,6 +2860,12 @@ const Game = {
 
     log(msg) { console.log(msg); },
 
+    renderGMStatus(status) {
+        const header = document.getElementById('event-title');
+        if (header) {
+            header.innerHTML = header.innerText + ` <span style="font-size:0.5em; color:#ff0055;">[${status}]</span>`;
+        }
+    },
     renderEvent(title, subtitle, content, icon) {
         document.getElementById('event-title').innerText = title;
         document.getElementById('event-desc').innerHTML = `<p>${subtitle}</p><p>${content}</p>`;
@@ -2250,9 +2911,14 @@ const Game = {
         }
     },
 
-    updateStatsUI() {
+	updateStatsUI() {
         document.getElementById('hp-val').innerText = Player.hp;
         document.getElementById('max-hp-val').innerText = Player.maxHp;
+        
+        // [新增] 補上這兩行來更新介面上的魔力數值
+        document.getElementById('mp-val').innerText = Player.mp;
+        document.getElementById('max-mp-val').innerText = Player.maxMp;
+
         document.getElementById('atk-val').innerText = this.getAtk();
         document.getElementById('gold-val').innerText = Player.gold;
         document.getElementById('depth-val').innerText = Player.depth;
@@ -2268,22 +2934,138 @@ const Game = {
         }
     },
 
+	// [修改] 渲染背包列表 (顯示數量與盾牌耐久)
     renderInvList(id, items, category) {
         const list = document.getElementById(id);
         list.innerHTML = "";
+        
         items.forEach((item, idx) => {
             const div = document.createElement('div');
             div.className = `item ${CONFIG.rarityDisplay[item.rarity].color}`;
+            
+            // 特殊邊框效果
             if (item.rarity === 'epic') div.classList.add('rare-epic');
             if (item.rarity === 'legendary') div.classList.add('rare-legendary');
             if (item.rarity === 'mythic') div.classList.add('rarity-mythic');
-            div.innerHTML = `${item.icon || '📦'} ${item.name}`;
+            
+            // 準備顯示文字
+            let displayText = `${item.icon || '📦'} ${item.name}`;
+            
+            // 如果是盾牌，顯示剩餘格擋次數
+            if (item.type === 'shield') {
+                displayText += ` <span style="font-size:0.8em; color:#aaa;">(剩餘:${item.val})</span>`;
+            } 
+            // 裝備顯示數值 (+攻/+防)
+            else if (['weapon', 'armor'].includes(item.type)) {
+                displayText += ` <span style="font-size:0.8em; color:#aaa;">(+${item.val})</span>`;
+            }
+
+            // [重點] 如果數量大於 1，顯示堆疊數量
+            if (item.count > 1) {
+                displayText += ` <span style="font-weight:bold; color:white;">x${item.count}</span>`;
+            }
+
+            div.innerHTML = displayText;
             div.onclick = () => this.handleItemClick(idx, category);
             list.appendChild(div);
         });
     }
 };
 
+// -------------------------------------------------------
+
+const GM = {
+    isEnabled: false,
+    // 1. 設定 GM 工具是否啟用 (預設關閉)
+    isEnabled: false, 
+
+    /**
+     * 開啟或關閉 GM 模式。
+     * @param {boolean} enable - true 為開啟，false 為關閉。
+     */
+    toggle(enable) {
+        this.isEnabled = enable;
+        const status = enable ? "已啟用" : "已停用";
+        console.warn(`GM TOOL: 偵測模式 ${status}.`);
+        if (!enable) {
+            // 關閉時清空暫存數據
+            localStorage.removeItem('gm_enabled');
+        } else {
+            // 開啟時標記，以便下次載入時提醒
+            localStorage.setItem('gm_enabled', 'true');
+        }
+        Game.renderGMStatus(status);
+    },
+
+    /**
+     * 傳送玩家到指定深度，並刷新商店/戰鬥邏輯。
+     * @param {number} depth - 目標層數
+     */
+    teleport(depth) {
+        if (!this.isEnabled) return console.error("GM TOOL: 請先使用 GM.toggle(true) 啟用工具。");
+        if (depth < 0) depth = 0;
+        
+        Player.depth = depth;
+        Player.dailyRefreshCount = 0; // 重置商店刷新次數
+        Game.updateUI();
+        Game.log(`[GM] 傳送至第 ${depth} 層。`);
+        Game.renderEvent("🔧 GM 傳送", `已將深度設定為 ${depth} 層。`, "請點擊「繼續」進入下一事件。", "⚡");
+        Game.setButtons("繼續", "nextEvent", "無", null, true);
+    },
+
+    /**
+     * 調整玩家核心數值。
+     * @param {string} stat - 數值名稱 (gold, hp, atk)
+     * @param {number} value - 目標數值
+     */
+    setStat(stat, value) {
+        if (!this.isEnabled) return console.error("GM TOOL: 請先使用 GM.toggle(true) 啟用工具。");
+        if (value < 0) value = 0;
+
+        switch(stat.toLowerCase()) {
+            case 'gold': 
+                Player.gold = value; 
+                Game.log(`[GM] 金幣設定為 ${value}.`);
+                break;
+            case 'hp':
+                Player.maxHp = value;
+                Player.hp = value;
+                Game.log(`[GM] 生命設定為 ${value}.`);
+                break;
+            case 'atk':
+                Player.baseAtk = value;
+                Game.log(`[GM] 基礎攻擊設定為 ${value}.`);
+                break;
+            default:
+                return console.error("GM TOOL: 無效的數值名稱。請使用 'gold', 'hp', 或 'atk'.");
+        }
+        Game.recalcStats(); // 重新計算所有數值
+        Game.updateUI();
+    },
+
+    // 快捷方式：獲取所有神話/極傳說裝備
+    getAllTopGear() {
+        if (!this.isEnabled) return console.error("GM TOOL: 請先使用 GM.toggle(true) 啟用工具。");
+        
+        const topRarities = ['ultra', 'mythic'];
+        const itemsToGive = CONFIG.itemPool.filter(i => 
+            topRarities.includes(i.rarity) && ['weapon', 'armor', 'shield'].includes(i.type)
+        );
+
+        itemsToGive.forEach(item => {
+            Game.addItemToInventory(item, false);
+        });
+
+        Game.updateUI();
+        Game.log(`[GM] 已獲得所有頂級裝備。`);
+        Game.showFloatingText("全頂級裝備到手!", "#ff0055");
+    }
+};
+// ==========================================
+// 【新增結束】
+// ==========================================
+
+window.GM = GM; // 將 GM 物件也掛載到全域
 window.Game = Game;
 Game.init();
 })();
